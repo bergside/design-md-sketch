@@ -66,12 +66,12 @@ function refreshStats() {
     `type ${state.stats.typographyExtracted}`,
     `radii ${state.stats.radiiExtracted}`,
     `spacing ${state.stats.spacingExtracted}`
-  ].join('  •  ')
+  ].join(' • ')
 
   elements.tokenMeta.textContent = [
     `DESIGN.md: ${state.stats.designTokensEstimated} tokens (${state.stats.designChars} chars)`,
     `SKILL.md: ${state.stats.skillTokensEstimated} tokens (${state.stats.skillChars} chars)`
-  ].join('  •  ')
+  ].join(' • ')
 }
 
 function refreshMeta() {

@@ -205,7 +205,7 @@ a:hover {
   flex-grow: 1;
   width: 100%;
   border: none;
-  padding: 12px;
+  padding: 12px 12px 34px;
   font-size: 12px;
   line-height: 1.6;
   color: var(--text-main);
@@ -215,16 +215,18 @@ a:hover {
   outline: none;
 }
 
-.meta-row {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-
-.token-meta {
+.token-meta-overlay {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
   font-size: 11px;
   color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  pointer-events: none;
+  box-shadow: var(--shadow-sm);
 }
 
 .footer {

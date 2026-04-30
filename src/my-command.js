@@ -20,6 +20,39 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : undefined
 }
 
+function safeDecodeURIComponent(value) {
+  try {
+    return decodeURIComponent(String(value || ''))
+  } catch (error) {
+    return String(value || '')
+  }
+}
+
+function toTitleWords(value) {
+  return String(value || '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function slugify(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function deriveDocumentTitle(document) {
+  const source = document.path
+    ? String(document.path).split('/').pop()
+    : (document.name || 'Untitled Sketch document')
+  const decoded = safeDecodeURIComponent(source).trim()
+  const withoutExt = decoded
+    .replace(/\.sketchcloud$/i, '')
+    .replace(/\.sketch$/i, '')
+  return withoutExt || 'Untitled Sketch document'
+}
+
 function normalizeColor(value) {
   if (typeof value !== 'string') {
     return null
@@ -275,6 +308,33 @@ function collectDocumentStyles(document) {
   return collector
 }
 
+function pickBrandFromStyleNames(styleNames, fallbackTitle) {
+  const candidates = new Map()
+  toArray(styleNames).forEach(name => {
+    const decoded = safeDecodeURIComponent(name)
+    const head = decoded.split(/[\/|:]/)[0]
+    const cleaned = toTitleWords(head)
+    if (!cleaned || cleaned.length < 2) {
+      return
+    }
+    recordCount(candidates, cleaned)
+  })
+
+  const mostCommon = topEntries(candidates, 1)[0]
+  if (mostCommon && mostCommon[0]) {
+    return mostCommon[0]
+  }
+  return toTitleWords(fallbackTitle)
+}
+
+function injectFrontmatterName(markdown, replacementName) {
+  const content = String(markdown || '')
+  if (!content.startsWith('---\n')) {
+    return content
+  }
+  return content.replace(/^name:\s*.+$/m, `name: ${replacementName}`)
+}
+
 function buildTokenSection(extracted) {
   const colorEntries = topEntries(extracted.colors, 12)
     .map(([color, count]) => `- \`${color}\` (${count})`)
@@ -302,8 +362,9 @@ function buildTokenSection(extracted) {
   }
 }
 
-function buildDesignDraft(blueprint, extracted, documentName) {
+function buildDesignDraft(blueprint, extracted, documentName, extractedDesignName) {
   const tokens = buildTokenSection(extracted)
+  const blueprintWithName = injectFrontmatterName(blueprint, extractedDesignName)
 
   const summary = [
     '## Sketch Extraction Snapshot',
@@ -334,13 +395,14 @@ function buildDesignDraft(blueprint, extracted, documentName) {
     tokens.spacing
   ].join('\n')
 
-  return `${blueprint.trim()}\n\n---\n\n${summary}\n`
+  return `${blueprintWithName.trim()}\n\n---\n\n${summary}\n`
 }
 
-function buildSkillDraft(blueprint, extracted, documentName) {
+function buildSkillDraft(blueprint, extracted, documentName, skillSystemName) {
   const topLayerStyles = extracted.sharedLayerStyles.slice(0, 12).map(name => `- ${name}`).join('\n') || '- None detected'
   const topTextStyles = extracted.sharedTextStyles.slice(0, 12).map(name => `- ${name}`).join('\n') || '- None detected'
   const tokenInputs = buildTokenSection(extracted)
+  const blueprintWithName = injectFrontmatterName(blueprint, skillSystemName)
 
   const appendix = [
     '## Sketch Inputs',
@@ -373,7 +435,7 @@ function buildSkillDraft(blueprint, extracted, documentName) {
     tokenInputs.spacing
   ].join('\n')
 
-  return `${blueprint.trim()}\n\n---\n\n${appendix}\n`
+  return `${blueprintWithName.trim()}\n\n---\n\n${appendix}\n`
 }
 
 function readResourceText(context, relativePath) {
@@ -482,11 +544,16 @@ function generateDrafts(context) {
   }
 
   const extracted = collectDocumentStyles(document)
-  const documentName = document.path
-    ? String(document.path).split('/').pop()
-    : (document.name || 'Untitled Sketch document')
-  const designMarkdown = buildDesignDraft(designBlueprint, extracted, documentName)
-  const skillMarkdown = buildSkillDraft(skillBlueprint, extracted, documentName)
+  const documentName = deriveDocumentTitle(document)
+  const brandScope = pickBrandFromStyleNames(
+    [...extracted.sharedLayerStyles, ...extracted.sharedTextStyles],
+    documentName
+  ) || 'Design System'
+  const designName = brandScope
+  const skillSystemName = `design-system-${slugify(brandScope) || 'brand-or-scope'}`
+
+  const designMarkdown = buildDesignDraft(designBlueprint, extracted, documentName, designName)
+  const skillMarkdown = buildSkillDraft(skillBlueprint, extracted, documentName, skillSystemName)
 
   return {
     designMarkdown,
@@ -517,7 +584,7 @@ function sendPayload(webContents, payload) {
 export default function onRun(context) {
   const browserWindow = new BrowserWindow({
     identifier: WEBVIEW_IDENTIFIER,
-    title: 'DESIGN.md Generator for Sketch - TypeUI',
+    title: 'DESIGN.md Generator - TypeUI',
     width: 1120,
     height: 780,
     minWidth: 840,
@@ -546,7 +613,7 @@ export default function onRun(context) {
       sendPayload(webContents, cachedPayload)
     } catch (error) {
       console.error(error)
-      UI.alert('DESIGN.md Generator for Sketch - TypeUI', String(error.message || error))
+      UI.alert('DESIGN.md Generator - TypeUI', String(error.message || error))
     }
   }
 
