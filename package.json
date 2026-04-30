@@ -1,6 +1,6 @@
 {
   "name": "design-md-sketch",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Sketch plugin that extracts styles and generates editable DESIGN.md and SKILL.md drafts based on TypeUI.",
   "homepage": "https://github.com/bergside/design-md-sketch",
   "author": "Bergside",
