@@ -1,0 +1,31 @@
+{
+  "compatibleVersion": 3,
+  "bundleVersion": 1,
+  "name": "DESIGN.md Generator for Sketch - TypeUI",
+  "authorEmail": "zoltan@bergside.com",
+  "description": "Automatically extracts local Sketch style guidelines and creates editable DESIGN.md and SKILL.md drafts.",
+  "identifier": "com.bergside.design-md-sketch",
+  "version": "1.0.0",
+  "author": "Bergside",
+  "homepage": "https://www.typeui.sh",
+  "icon": "logo.svg",
+  "commands": [
+    {
+      "name": "Open DESIGN.md Generator",
+      "identifier": "com.bergside.design-md-sketch.open-generator",
+      "script": "./my-command.js",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    }
+  ],
+  "menu": {
+    "title": "DESIGN.md Generator for Sketch - TypeUI",
+    "items": [
+      "com.bergside.design-md-sketch.open-generator"
+    ]
+  }
+}
