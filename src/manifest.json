@@ -5,7 +5,7 @@
   "authorEmail": "zoltan@bergside.com",
   "description": "Automatically extracts local Sketch style guidelines and creates editable DESIGN.md and SKILL.md drafts.",
   "identifier": "com.bergside.design-md-sketch",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "author": "Bergside LLC",
   "homepage": "https://www.typeui.sh",
   "appcast": "https://raw.githubusercontent.com/bergside/design-md-sketch/main/.appcast.xml",
