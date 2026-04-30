@@ -8,6 +8,7 @@
   "version": "1.0.0",
   "author": "Bergside LLC",
   "homepage": "https://www.typeui.sh",
+  "appcast": "https://raw.githubusercontent.com/bergside/design-md-sketch/main/.appcast.xml",
   "icon": "logo.svg",
   "commands": [
     {
